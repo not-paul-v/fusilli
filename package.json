@@ -1,0 +1,19 @@
+{
+  "name": "kochbuch",
+  "version": "0.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {},
+  "devDependencies": {
+    "@tsconfig/node22": "^22",
+    "prettier": "^3.6.2",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "sst": "3.17.13"
+  },
+  "trustedDependencies": [
+    "aws-sdk"
+  ]
+}

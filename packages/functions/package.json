@@ -1,0 +1,10 @@
+{
+  "name": "@kochbuch/functions",
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "@kochbuch/core": "*",
+    "sst": "*"
+  },
+  "devDependencies": {}
+}
