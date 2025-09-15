@@ -8,8 +8,8 @@ export default {
         return new Response("Missing url parameter", { status: 400 });
       }
 
-      const result = Scraper.scrape(url);
-      return new Response(result);
+      const result = await Scraper.scrape(url);
+      return Response.json(result);
     }
 
     return new Response("Method not allowed", { status: 405 });

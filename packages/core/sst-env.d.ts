@@ -3,7 +3,24 @@
 /* eslint-disable */
 /* deno-fmt-ignore-file */
 
-/// <reference path="../../sst-env.d.ts" />
+import "sst"
+declare module "sst" {
+  export interface Resource {
+    "StaticSite": {
+      "type": "sst.cloudflare.StaticSite"
+      "url": string
+    }
+  }
+}
+// cloudflare 
+import * as cloudflare from "@cloudflare/workers-types";
+declare module "sst" {
+  export interface Resource {
+    "DB": cloudflare.D1Database
+    "RecipeExtraction": cloudflare.Service
+    "Scraper": cloudflare.Service
+  }
+}
 
 import "sst"
 export {}

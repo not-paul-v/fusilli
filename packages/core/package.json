@@ -12,9 +12,14 @@
     ]
   },
   "dependencies": {
-    "sst": "*"
+    "@mozilla/readability": "^0.6.0",
+    "linkedom": "^0.18.12",
+    "sst": "*",
+    "tiny-invariant": "^1.3.3",
+    "zod": "^4.1.8"
   },
   "devDependencies": {
-    "vitest": "^2"
+    "vitest": "^2",
+    "@cloudflare/workers-types": "^4.20250913.0"
   }
 }

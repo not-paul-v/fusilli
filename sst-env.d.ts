@@ -9,6 +9,10 @@ declare module "sst" {
       "databaseId": string
       "type": "sst.cloudflare.D1"
     }
+    "RecipeExtraction": {
+      "type": "sst.cloudflare.Worker"
+      "url": string
+    }
     "Scraper": {
       "type": "sst.cloudflare.Worker"
       "url": string

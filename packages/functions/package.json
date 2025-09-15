@@ -4,7 +4,10 @@
   "type": "module",
   "dependencies": {
     "@kochbuch/core": "*",
-    "sst": "*"
+    "sst": "*",
+    "zod": "^4.1.8"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250913.0"
+  }
 }
