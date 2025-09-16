@@ -1,9 +1,11 @@
 import type { Ai } from "@cloudflare/workers-types";
 import { RecipeExtraction } from "@kochbuch/core/recipe-extraction";
+import OpenAI from "openai";
 import z from "zod";
 
 export interface Env {
   AI: Ai;
+  OPENROUTER_TOKEN: string;
 }
 
 export default {
@@ -20,9 +22,14 @@ export default {
         return new Response("Invalid input", { status: 400 });
       }
 
+      const openai = new OpenAI({
+        baseURL: "https://openrouter.ai/api/v1",
+        apiKey: env.OPENROUTER_TOKEN,
+      });
+
       try {
-        const extractedRecipe = await RecipeExtraction.extract(
-          env.AI,
+        const extractedRecipe = await RecipeExtraction.extractWithOpenRouter(
+          openai,
           result.data.textContent,
         );
         return Response.json(extractedRecipe);

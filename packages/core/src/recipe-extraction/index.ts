@@ -1,25 +1,39 @@
-import type { Ai } from "@cloudflare/workers-types";
 import { recipeSchema } from "./schema";
-import z from "zod";
+import { toJSONSchema } from "zod";
+import OpenAI from "openai";
+import invariant from "tiny-invariant";
 
 export module RecipeExtraction {
-  export async function extract(ai: Ai, recipeText: string) {
-    // https://github.com/cloudflare/workerd/issues/4887
-    // @ts-expect-error AI.run typing is broken
-    const result = await ai.run("@cf/openai/gpt-oss-20b", {
-      input: `${getInstructions()}\n### REZEPTTEXT:\n${recipeText}`,
-      max_tokens: 5000,
+  export async function extractWithOpenRouter(
+    openai: OpenAI,
+    recipeText: string,
+  ) {
+    const completion = await openai.chat.completions.create({
+      model: "google/gemini-2.0-flash-001",
+      messages: [
+        {
+          role: "system",
+          content: getInstructions(),
+        },
+        {
+          role: "user",
+          content: `### REZEPTTEXT:\n${recipeText}`,
+        },
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "Recipe",
+          schema: toJSONSchema(recipeSchema),
+        },
+      },
     });
 
-    // @ts-expect-error typing is broken
-    const responseText = result.output[1].content[0].text;
-    // remove markdown code block if present
-    const jsonString = responseText
-      .replace(/```json/, "")
-      .replace(/```/, "")
-      .trim();
-    const json = JSON.parse(jsonString);
-    return recipeSchema.parse(json);
+    const responseText = completion.choices[0].message.content;
+    invariant(responseText, "No response from AI model");
+
+    const response = JSON.parse(completion.choices[0].message.content!);
+    return recipeSchema.parse(response);
   }
 
   function getInstructions() {
@@ -30,7 +44,7 @@ export module RecipeExtraction {
       Der gesamte, unformatierte Text einer Rezept-Webseite wird dir als Input zur Verfügung gestellt, unabhängig von der Originalsprache.
 
       **Output-Struktur (JSON mit englischen Properties):**
-      Analysiere den folgenden Text und gib die extrahierten Informationen ausschließlich im folgenden JSON-Format zurück. Die **Werte** innerhalb der JSON-Struktur (z.B. Namen, Beschreibungen, Anweisungen) müssen **auf Deutsch** sein.
+      Analysiere den folgenden Text und gib die extrahierten Informationen ausschließlich im folgenden JSON-Format zurück. Die **Werte** innerhalb der JSON-Struktur (z.B. Namen, Beschreibungen, Anweisungen) müssen **auf Deutsch** sein. Deine Antwort muss ein valides JSON-Objekt sein, ohne zusätzliche Erklärungen, Text oder Markdown.
 
       \'\'\'json
       {
@@ -98,6 +112,7 @@ export module RecipeExtraction {
                 * Verwende für die Menge (\`quantity\`) das Objekt mit \`type\`:
                     * \`{ "type": "exact", "value": 250 }\` für "250g".
                     * \`{ "type": "range", "minValue": 2, "maxValue": 3 }\` für "2-3 Eier".
+                * Falls keine Menge gefunden werden kann, lasse die Zutat weg.
             * **Liste \`otherIngredients\` (textuell):**
                 * Füge hier nur Zutaten ein, deren Menge nicht numerisch ist (z.B. "eine Prise", "etwas", "nach Geschmack").
                 * Speichere die gesamte textuelle Mengenangabe im Feld \`quantityDescription\` als String.
