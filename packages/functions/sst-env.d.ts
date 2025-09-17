@@ -16,6 +16,7 @@ declare module "sst" {
 import * as cloudflare from "@cloudflare/workers-types";
 declare module "sst" {
   export interface Resource {
+    "Api": cloudflare.Service
     "DB": cloudflare.D1Database
     "RecipeExtraction": cloudflare.Service
     "Scraper": cloudflare.Service

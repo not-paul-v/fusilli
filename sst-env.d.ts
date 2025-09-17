@@ -5,6 +5,10 @@
 
 declare module "sst" {
   export interface Resource {
+    "Api": {
+      "type": "sst.cloudflare.Worker"
+      "url": string
+    }
     "DB": {
       "databaseId": string
       "type": "sst.cloudflare.D1"
