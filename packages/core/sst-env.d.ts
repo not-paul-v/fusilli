@@ -18,8 +18,6 @@ declare module "sst" {
   export interface Resource {
     "Api": cloudflare.Service
     "DB": cloudflare.D1Database
-    "RecipeExtraction": cloudflare.Service
-    "Scraper": cloudflare.Service
   }
 }
 
