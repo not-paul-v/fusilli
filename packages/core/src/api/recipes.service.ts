@@ -1,19 +1,10 @@
-import { Service } from "@cloudflare/workers-types";
-import { Hono } from "hono";
+import { Context, Hono } from "hono";
+import { Bindings } from "./types";
 
-type Bindings = {
-  Scraper: Service;
-  RecipeExtraction: Service;
-};
-
-const app = new Hono<{ Bindings: Bindings }>();
-
-app.get("/from-link", async (c) => {
-  const url = c.req.query("url");
-  if (url == null) {
-    return c.json({ error: "Missing url parameter" }, 400);
-  }
-
+export async function getRecipeFromLink(
+  c: Context<{ Bindings: Bindings }>,
+  url: string,
+) {
   const scraperResponse = await c.env.Scraper.fetch(
     `https://Scraper/?url=${url}`,
   );
@@ -31,7 +22,5 @@ app.get("/from-link", async (c) => {
     },
   );
   const extractionResponseBody = (await extractionResponse.json()) as {};
-  return c.json(extractionResponseBody);
-});
-
-export default app;
+  return extractionResponseBody;
+}

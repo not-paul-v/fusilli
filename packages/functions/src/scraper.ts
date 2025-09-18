@@ -9,18 +9,8 @@ export default {
         return new Response("Missing url parameter", { status: 400 });
       }
 
-      const { textContent } = await Scraper.scrape(url);
-
-      const response = await Resource.RecipeExtraction.fetch(
-        env.RECIPE_EXTRACTION_URL,
-        {
-          method: "POST",
-          body: JSON.stringify({ textContent }),
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-
-      return response;
+      const response = await Scraper.scrape(url);
+      return Response.json(response);
     }
 
     return new Response("Method not allowed", { status: 405 });

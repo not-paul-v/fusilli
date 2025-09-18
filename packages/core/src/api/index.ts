@@ -1,11 +1,17 @@
 import { Hono } from "hono";
-import recipes from "./recipes";
+import { Bindings } from "./types";
+import { getRecipeFromLink } from "./recipes.service";
 
-export module Api {
-  export function buildApi() {
-    const app = new Hono();
-    app.route("/recipes", recipes);
+export module Recipes {
+  export const app = new Hono<{ Bindings: Bindings }>();
 
-    return app;
-  }
+  app.get("/from-link", async (c) => {
+    const url = c.req.query("url");
+    if (url == null) {
+      return c.json({ error: "Missing url parameter" }, 400);
+    }
+
+    const recipe = getRecipeFromLink(c, url);
+    return c.json(recipe);
+  });
 }
