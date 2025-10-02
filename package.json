@@ -4,13 +4,16 @@
   "workspaces": [
     "packages/*"
   ],
-  "scripts": {},
+  "scripts": {
+    "db": "sst shell drizzle-kit"
+  },
   "devDependencies": {
     "@tsconfig/node22": "^22",
     "prettier": "^3.6.2",
     "typescript": "^5"
   },
   "dependencies": {
+    "drizzle-kit": "^0.31.5",
     "sst": "3.17.13"
   },
   "trustedDependencies": [
