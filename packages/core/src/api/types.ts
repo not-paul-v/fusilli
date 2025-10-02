@@ -1,5 +1,5 @@
 import { D1Database } from "@cloudflare/workers-types";
-import { DrizzleDatabase } from "../db/types";
+import { DrizzleDatabase } from "@/db/types";
 
 // db binding set in sst config
 export type Bindings = {

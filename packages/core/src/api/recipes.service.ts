@@ -1,5 +1,3 @@
-import { Context, Hono } from "hono";
-import { Bindings } from "./types";
 import { OpenAI } from "openai";
 import { Scraper } from "../scraper";
 import { RecipeExtraction } from "../recipe-extraction";

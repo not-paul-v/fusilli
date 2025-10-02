@@ -1,6 +1,6 @@
 import { createMiddleware } from "hono/factory";
 import { Bindings, Variables } from "../types";
-import { databaseClient } from "../../db/client";
+import { databaseClient } from "@/db/client";
 
 export const dbMiddleware = createMiddleware<{
   Bindings: Bindings;
