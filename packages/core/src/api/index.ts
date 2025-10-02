@@ -1,11 +1,14 @@
 import { Hono } from "hono";
-import { Bindings } from "./types";
+import { Bindings, Variables } from "./types";
 import { getRecipeFromLink } from "./recipes.service";
 import { OpenAI } from "openai";
 import { env } from "hono/adapter";
+import { dbMiddleware } from "./middleware/db";
 
 export module Recipes {
-  export const app = new Hono<{ Bindings: Bindings }>();
+  export const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
+
+  app.use(dbMiddleware);
 
   app.get("/from-link", async (c) => {
     const url = c.req.query("url");
