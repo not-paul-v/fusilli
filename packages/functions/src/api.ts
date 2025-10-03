@@ -1,8 +1,8 @@
 import { Hono } from "hono";
-import { Recipes } from "@kochbuch/core/api";
+import { API } from "@kochbuch/core/api";
 
 const app = new Hono();
 
-app.route("/recipes", Recipes.app);
+app.route("/api", API.app);
 
 export default app;

@@ -1,8 +1,13 @@
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
+import { hc } from "hono/client";
+import { API } from "@kochbuch/core/api";
 
 function App() {
+  // const client = hc<API.Api>("");
+  // client["from-link"].$get({query: {url: ""}})
+
   return (
     <>
       <div>
