@@ -5,7 +5,8 @@
     "packages/*"
   ],
   "scripts": {
-    "db": "sst shell drizzle-kit"
+    "db": "sst shell drizzle-kit",
+    "better-auth:generate": "bunx @better-auth/cli generate --config ./packages/core/src/api/auth/auth.ts --output ./packages/core/src/db/schemas/auth.ts"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22",

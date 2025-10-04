@@ -5,6 +5,7 @@
     "moduleResolution": "Bundler",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "types": ["@cloudflare/workers-types"]
   }
 }

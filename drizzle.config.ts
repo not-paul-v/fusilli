@@ -4,7 +4,7 @@ import { Resource } from "sst";
 export default defineConfig({
   dialect: "sqlite",
   driver: "d1-http",
-  schema: "./packages/core/src/db/schema.ts",
+  schema: "./packages/core/src/db/schemas",
   out: "./packages/core/src/db/migrations",
   dbCredentials: {
     databaseId: Resource.DB.databaseId,
