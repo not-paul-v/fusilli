@@ -3,21 +3,25 @@ import { Bindings, Env, Variables } from "./types";
 import { getRecipeFromLink } from "./recipes.service";
 import { OpenAI } from "openai";
 import { env } from "hono/adapter";
-import { dbMiddleware } from "./middleware/db";
+import { drizzleMiddleware } from "./middleware/drizzle";
 import { zValidator } from "@hono/zod-validator";
 import z from "zod";
-import { auth } from "./auth";
+import { auth, createAuth } from "./auth";
 import { corsMiddleware } from "./middleware/cors";
 import { authMiddleware } from "./middleware/auth";
 
 export module API {
   export const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
-  app.use(dbMiddleware);
-  app.use("/auth/*", corsMiddleware);
+  app.use(drizzleMiddleware);
+  app.use(corsMiddleware);
   app.use(authMiddleware);
 
-  app.on(["GET", "POST"], "/auth/*", (c) => auth.handler(c.req.raw));
+  app.on(["GET", "POST"], "/auth/*", (c) => {
+    const db = c.get("db");
+    const auth = createAuth(db);
+    return auth.handler(c.req.raw);
+  });
 
   const routes = app.get(
     "/from-link",

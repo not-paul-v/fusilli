@@ -13,12 +13,14 @@
     "hono": "4.9.7",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "@kochbuch/core": "*"
+    "better-auth": "1.3.26"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@kochbuch/core": "*",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-basic-ssl": "^2.1.0",
     "@vitejs/plugin-react": "^5.0.0",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",

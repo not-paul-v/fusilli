@@ -6,7 +6,9 @@ export const authMiddleware = createMiddleware<{
   Bindings: Bindings;
   Variables: Variables;
 }>(async (c, next) => {
-  const auth = createAuth(c.env.DB);
+  const drizzle = c.get("db");
+  const url = new URL(c.req.url);
+  const auth = createAuth(drizzle, url.origin);
 
   const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
