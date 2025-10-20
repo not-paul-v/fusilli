@@ -51,6 +51,7 @@ export const server = await Worker("server", {
     CORS_ORIGIN: process.env.CORS_ORIGIN || "",
     BETTER_AUTH_SECRET: alchemy.secret(process.env.BETTER_AUTH_SECRET),
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || "",
+    OPENROUTER_API_KEY: alchemy.secret(process.env.OPENROUTER_API_KEY),
     SCRAPER: scraper,
   },
   dev: {
