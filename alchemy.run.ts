@@ -1,10 +1,10 @@
 import alchemy, { type } from "alchemy";
 import { BrowserRendering, Vite } from "alchemy/cloudflare";
 import { Worker } from "alchemy/cloudflare";
-import { D1Database } from "alchemy/cloudflare";
+import { D1Database, Workflow } from "alchemy/cloudflare";
 import { Exec } from "alchemy/os";
 import { config } from "dotenv";
-import type Scraper from "./apps/scraper/src";
+import type { Params as ExtraceRecipeWorkflowParams } from "./apps/server/src/workflows/extract-recipe";
 
 config({ path: "./.env" });
 config({ path: "./apps/web/.env" });
@@ -32,16 +32,6 @@ export const web = await Vite("web", {
   },
 });
 
-export const scraper = await Worker("scraper", {
-  cwd: "apps/scraper",
-  entrypoint: "src/index.ts",
-  compatibility: "node",
-  bindings: {
-    BROWSER: BrowserRendering(),
-  },
-  rpc: type<Scraper>,
-});
-
 export const server = await Worker("server", {
   cwd: "apps/server",
   entrypoint: "src/index.ts",
@@ -52,7 +42,14 @@ export const server = await Worker("server", {
     BETTER_AUTH_SECRET: alchemy.secret(process.env.BETTER_AUTH_SECRET),
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || "",
     OPENROUTER_API_KEY: alchemy.secret(process.env.OPENROUTER_API_KEY),
-    SCRAPER: scraper,
+    BROWSER: BrowserRendering(),
+    EXTRACT_RECIPE_WORKFLOW: Workflow<ExtraceRecipeWorkflowParams>(
+      "extract-recipe",
+      {
+        workflowName: "extract-recipe",
+        className: "ExtractRecipeWorkflow",
+      },
+    ),
   },
   dev: {
     port: 3000,

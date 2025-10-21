@@ -37,6 +37,7 @@
     "apps/server": {
       "name": "server",
       "dependencies": {
+        "@cloudflare/puppeteer": "^1.0.4",
         "@hono/zod-validator": "catalog:",
         "@kochbuch/auth": "workspace:*",
         "@kochbuch/db": "workspace:*",

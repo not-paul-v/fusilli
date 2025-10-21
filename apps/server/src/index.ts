@@ -5,14 +5,8 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { zValidator } from "@hono/zod-validator";
 import z from "zod";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { generateObject } from "ai";
-import { RecipeSchema as recipeSchema } from "./schemas/recipe";
-import { extractRecipeSystemPrompt } from "./prompts/recipe";
 
-const openrouter = createOpenRouter({
-  apiKey: env.OPENROUTER_API_KEY,
-});
+export * from "./workflows";
 
 const app = new Hono();
 
@@ -29,24 +23,16 @@ app.use(
 
 app.on(["POST", "GET"], "/auth/*", (c) => auth.handler(c.req.raw));
 
-app.get("/", (c) => {
-  return c.json({ mesasge: "hello" });
+app.get("/workflows/:workflowId", async (c) => {
+  const workflow = await env.EXTRACT_RECIPE_WORKFLOW.get(
+    c.req.param("workflowId"),
+  );
+  const status = await workflow.status();
+  return c.json({
+    id: workflow.id,
+    status,
+  });
 });
-
-app.get(
-  "/text-contents",
-  zValidator(
-    "query",
-    z.object({
-      url: z.url(),
-    }),
-  ),
-  async (c) => {
-    const url = c.req.valid("query").url;
-    const { textContent } = await env.SCRAPER.getTextContentOfPage(url);
-    return new Response(textContent);
-  },
-);
 
 app.get(
   "/recipes/from-link",
@@ -57,17 +43,16 @@ app.get(
     }),
   ),
   async (c) => {
-    const url = c.req.valid("query").url;
-    const { textContent } = await env.SCRAPER.getTextContentOfPage(url);
-
-    const { object: recipe } = await generateObject({
-      model: openrouter.chat("google/gemini-2.5-flash"),
-      prompt: textContent,
-      schema: recipeSchema,
-      system: extractRecipeSystemPrompt,
+    const instance = await env.EXTRACT_RECIPE_WORKFLOW.create({
+      params: {
+        url: c.req.valid("query").url,
+      },
     });
 
-    return c.json(recipe);
+    return c.json({
+      id: instance.id,
+      details: await instance.status(),
+    });
   },
 );
 
