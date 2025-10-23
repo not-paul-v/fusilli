@@ -17,6 +17,14 @@ await Exec("db-generate", {
   command: "bun run db:generate",
 });
 
+await Exec("db-studio", {
+  cwd: "packages/db",
+  command: "bun run db:studio",
+  env: {
+    LOCAL: app.local ? "true" : "false",
+  },
+});
+
 const db = await D1Database("database", {
   migrationsDir: "packages/db/src/migrations",
 });
@@ -35,7 +43,8 @@ export const web = await Vite("web", {
 export const server = await Worker("server", {
   cwd: "apps/server",
   entrypoint: "src/index.ts",
-  compatibility: "node",
+  compatibilityFlags: ["nodejs_compat"],
+  compatibilityDate: "2024-09-24",
   bindings: {
     DB: db,
     CORS_ORIGIN: process.env.CORS_ORIGIN || "",
