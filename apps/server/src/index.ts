@@ -5,6 +5,7 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { zValidator } from "@hono/zod-validator";
 import z from "zod";
+import { db, recipe } from "@kochbuch/db";
 
 export * from "./workflows";
 
@@ -32,6 +33,17 @@ app.get("/workflows/:workflowId", async (c) => {
     id: workflow.id,
     status,
   });
+});
+
+app.get("/test", async (c) => {
+  const res = await db.insert(recipe).values({
+    name: "yee",
+    description: "haw",
+    originUrl: "",
+    slug: "yee-haw",
+  });
+
+  return c.json({ res });
 });
 
 app.get(

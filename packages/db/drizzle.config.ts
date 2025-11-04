@@ -10,7 +10,7 @@ export default defineConfig({
   out: "./src/migrations",
   // DOCS: https://orm.drizzle.team/docs/guides/d1-http-with-drizzle-kit
   dialect: "sqlite",
-  ...(process.env.LOCAL === "true"
+  ...(process.env.LOCAL !== "false"
     ? {
         dbCredentials: {
           // TODO: don't hardcode path

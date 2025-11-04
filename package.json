@@ -13,7 +13,10 @@
       "zod": "^4.1.11",
       "typescript": "^5.8.2",
       "tsdown": "^0.15.5",
-      "@hono/zod-validator": "^0.7.3"
+      "@hono/zod-validator": "^0.7.3",
+      "tiny-invariant": "^1.3.3",
+      "ts-pattern": "^5.8.0",
+      "drizzle-orm": "^0.44.2"
     }
   },
   "scripts": {
@@ -26,6 +29,7 @@
     "dev:server": "turbo -F server dev",
     "db:push": "turbo -F @kochbuch/db db:push",
     "db:generate": "turbo -F @kochbuch/db db:generate",
+    "db:studio": "turbo -F @kochbuch/db db:studio",
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy"
   },
@@ -39,7 +43,7 @@
     "oxlint": "^1.12.0",
     "tsdown": "^0.15.5",
     "@types/node": "^22.13.11",
-    "alchemy": "^0.74.2",
+    "alchemy": "^0.77.0",
     "@cloudflare/workers-types": "^4.20250822.0"
   },
   "packageManager": "bun@1.2.23"
