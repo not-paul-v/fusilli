@@ -14,7 +14,7 @@ import {
   recipe as recipeTable,
   step as stepTable,
   ingredient as ingredientTable,
-} from "@kochbuch/db";
+} from "@fusilli/db";
 import invariant from "tiny-invariant";
 import { match } from "ts-pattern";
 import { NonRetryableError } from "cloudflare:workflows";

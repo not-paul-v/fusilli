@@ -1,5 +1,5 @@
 {
-  "name": "kochbuch",
+  "name": "fusilli",
   "private": true,
   "type": "module",
   "workspaces": {
@@ -27,9 +27,9 @@
     "dev:native": "turbo -F native dev",
     "dev:web": "turbo -F web dev",
     "dev:server": "turbo -F server dev",
-    "db:push": "turbo -F @kochbuch/db db:push",
-    "db:generate": "turbo -F @kochbuch/db db:generate",
-    "db:studio": "turbo -F @kochbuch/db db:studio",
+    "db:push": "turbo -F @fusilli/db db:push",
+    "db:generate": "turbo -F @fusilli/db db:generate",
+    "db:studio": "turbo -F @fusilli/db db:studio",
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy"
   },

@@ -1,11 +1,11 @@
 import { env } from "cloudflare:workers";
-import { auth } from "@kochbuch/auth";
+import { auth } from "@fusilli/auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { zValidator } from "@hono/zod-validator";
 import z from "zod";
-import { db, recipe } from "@kochbuch/db";
+import { db, recipe } from "@fusilli/db";
 
 export * from "./workflows";
 

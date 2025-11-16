@@ -21,9 +21,9 @@
       "name": "server",
       "dependencies": {
         "@cloudflare/puppeteer": "^1.0.4",
+        "@fusilli/auth": "workspace:*",
+        "@fusilli/db": "workspace:*",
         "@hono/zod-validator": "catalog:",
-        "@kochbuch/auth": "workspace:*",
-        "@kochbuch/db": "workspace:*",
         "@openrouter/ai-sdk-provider": "^1.2.0",
         "@paralleldrive/cuid2": "^3.1.0",
         "ai": "^5.0.76",
@@ -48,8 +48,8 @@
       "name": "web",
       "version": "0.0.0",
       "dependencies": {
+        "@fusilli/auth": "workspace:*",
         "@hookform/resolvers": "^5.1.1",
-        "@kochbuch/auth": "workspace:*",
         "@tailwindcss/vite": "^4.0.15",
         "@tanstack/react-form": "^1.12.3",
         "@tanstack/react-query": "^5.85.5",
@@ -85,9 +85,9 @@
       },
     },
     "packages/auth": {
-      "name": "@kochbuch/auth",
+      "name": "@fusilli/auth",
       "dependencies": {
-        "@kochbuch/db": "workspace:*",
+        "@fusilli/db": "workspace:*",
         "better-auth": "catalog:",
         "dotenv": "catalog:",
         "zod": "catalog:",
@@ -100,7 +100,7 @@
       },
     },
     "packages/db": {
-      "name": "@kochbuch/db",
+      "name": "@fusilli/db",
       "dependencies": {
         "@libsql/client": "^0.14.0",
         "dotenv": "catalog:",
@@ -507,6 +507,10 @@
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.10", "", {}, "sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ=="],
 
+    "@fusilli/auth": ["@fusilli/auth@workspace:packages/auth"],
+
+    "@fusilli/db": ["@fusilli/db@workspace:packages/db"],
+
     "@hexagon/base64": ["@hexagon/base64@1.1.28", "", {}, "sha512-lhqDEAvWixy3bZ+UOYbPwUbBkwBq5C1LAJ/xPC8Oi+lL54oyakv/npbA0aU2hgCsx/1NUd4IBvV03+aUBWxerw=="],
 
     "@hono/zod-validator": ["@hono/zod-validator@0.7.3", "", { "peerDependencies": { "hono": ">=3.9.0", "zod": "^3.25.0 || ^4.0.0" } }, "sha512-uYGdgVib3RlGD698WR5dVM0zB3UuPY5vHKXffGUbUh7r4xY+mFIhF3/v4AcQVLrU5CQdBso8BJr4wuVoCrjTuQ=="],
@@ -568,10 +572,6 @@
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.9", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.0.3", "@jridgewell/sourcemap-codec": "^1.4.10" } }, "sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ=="],
-
-    "@kochbuch/auth": ["@kochbuch/auth@workspace:packages/auth"],
-
-    "@kochbuch/db": ["@kochbuch/db@workspace:packages/db"],
 
     "@levischuck/tiny-cbor": ["@levischuck/tiny-cbor@0.2.11", "", {}, "sha512-llBRm4dT4Z89aRsm6u2oEZ8tfwL/2l6BwpZ7JcyieouniDECM5AqNgr/y08zalEIvW3RSK4upYyybDcmjXqAow=="],
 

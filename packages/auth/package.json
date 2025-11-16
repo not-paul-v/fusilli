@@ -1,5 +1,5 @@
 {
-  "name": "@kochbuch/auth",
+  "name": "@fusilli/auth",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -24,6 +24,6 @@
     "better-auth": "catalog:",
     "dotenv": "catalog:",
     "zod": "catalog:",
-    "@kochbuch/db": "workspace:*"
+    "@fusilli/db": "workspace:*"
   }
 }

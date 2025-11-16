@@ -1,5 +1,5 @@
 {
-  "name": "@kochbuch/db",
+  "name": "@fusilli/db",
   "type": "module",
   "exports": {
     ".": {

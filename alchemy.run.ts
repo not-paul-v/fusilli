@@ -1,4 +1,4 @@
-import alchemy, { type } from "alchemy";
+import alchemy from "alchemy";
 import { BrowserRendering, Vite } from "alchemy/cloudflare";
 import { Worker } from "alchemy/cloudflare";
 import { D1Database, Workflow } from "alchemy/cloudflare";
@@ -10,7 +10,7 @@ config({ path: "./.env" });
 config({ path: "./apps/web/.env" });
 config({ path: "./apps/server/.env" });
 
-const app = await alchemy("kochbuch");
+const app = await alchemy("fusilli");
 
 await Exec("db-generate", {
   cwd: "packages/db",

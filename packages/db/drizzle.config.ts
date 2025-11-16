@@ -19,6 +19,5 @@ export default defineConfig({
       }
     : {
         driver: "d1-http",
-        // TODO: credentials for remote db
       }),
 });
