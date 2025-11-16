@@ -1,5 +1,5 @@
 {
-  "name": "web",
+  "name": "@fusilli/web",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -30,7 +30,9 @@
     "@tanstack/react-query": "^5.85.5",
     "vite-plugin-pwa": "^1.0.1",
     "better-auth": "catalog:",
-    "@fusilli/auth": "workspace:*"
+    "hono": "catalog:",
+    "@fusilli/auth": "workspace:*",
+    "@fusilli/server": "workspace:*"
   },
   "devDependencies": {
     "@tanstack/react-router-devtools": "^1.114.27",
