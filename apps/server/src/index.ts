@@ -6,23 +6,17 @@ import { logger } from "hono/logger";
 import { zValidator } from "@hono/zod-validator";
 import z from "zod";
 import { db } from "@fusilli/db";
+import {
+  authMiddleware,
+  type AuthMiddlewareVariables,
+} from "./middleware/auth";
 
 export * from "./workflows";
 
-const api = new Hono()
-  .on(["POST", "GET"], "/auth/*", (c) => auth.handler(c.req.raw))
-  .get("/workflows/:workflowId", async (c) => {
-    const workflow = await env.EXTRACT_RECIPE_WORKFLOW.get(
-      c.req.param("workflowId"),
-    );
-    const status = await workflow.status();
-    return c.json({
-      id: workflow.id,
-      status,
-    });
-  })
+const recipeRoutes = new Hono<{ Variables: AuthMiddlewareVariables }>()
+  .use(authMiddleware)
   .get(
-    "/recipes/from-link",
+    "/from-link",
     zValidator(
       "query",
       z.object({
@@ -30,9 +24,11 @@ const api = new Hono()
       }),
     ),
     async (c) => {
+      const user = c.get("user");
       const instance = await env.EXTRACT_RECIPE_WORKFLOW.create({
         params: {
           url: c.req.valid("query").url,
+          userId: user.id,
         },
       });
 
@@ -42,13 +38,15 @@ const api = new Hono()
       });
     },
   )
-  .get("/recipes", async (c) => {
+  .get("/", async (c) => {
+    const user = c.get("user");
     const recipes = await db.query.recipe.findMany({
+      where: (recipe, { eq }) => eq(recipe.userId, user.id),
       orderBy: (recipe, { desc }) => desc(recipe.createdAt),
     });
     return c.json(recipes);
   })
-  .get("/recipes/:slug", async (c) => {
+  .get("/:slug", async (c) => {
     const recipeSlug = c.req.param("slug");
     const recipe = await db.query.recipe.findFirst({
       where: (recipe, { eq }) => eq(recipe.slug, recipeSlug),
@@ -58,7 +56,7 @@ const api = new Hono()
     }
     return c.json(recipe);
   })
-  .get("/recipes/:id/ingredients", async (c) => {
+  .get("/:id/ingredients", async (c) => {
     const recipeId = c.req.param("id");
     const ingredients = await db.query.ingredient.findMany({
       where: (ingredient, { eq }) => eq(ingredient.recipeId, recipeId),
@@ -66,13 +64,30 @@ const api = new Hono()
     });
     return c.json(ingredients);
   })
-  .get("/recipes/:id/steps", async (c) => {
+  .get("/:id/steps", async (c) => {
     const recipeId = c.req.param("id");
     const steps = await db.query.step.findMany({
       where: (step, { eq }) => eq(step.recipeId, recipeId),
       orderBy: (step, { asc }) => asc(step.createdAt),
     });
     return c.json(steps);
+  });
+
+const authRoutes = new Hono().on(["POST", "GET"], "/*", (c) =>
+  auth.handler(c.req.raw),
+);
+
+const workflowRoutes = new Hono()
+  .use(authMiddleware)
+  .get("/:workflowId", async (c) => {
+    const workflow = await env.EXTRACT_RECIPE_WORKFLOW.get(
+      c.req.param("workflowId"),
+    );
+    const status = await workflow.status();
+    return c.json({
+      id: workflow.id,
+      status,
+    });
   });
 
 const app = new Hono()
@@ -86,7 +101,9 @@ const app = new Hono()
       credentials: true,
     }),
   )
-  .route("/api", api);
+  .route("/api/auth", authRoutes)
+  .route("/api/recipes", recipeRoutes)
+  .route("/api/workflows", workflowRoutes);
 
-export default api;
+export default app;
 export type AppType = typeof app;
