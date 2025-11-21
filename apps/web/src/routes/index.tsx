@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useLiveQuery } from "@tanstack/react-db";
-import { recipeCollection } from "@/collections/collections";
+import { recipeCollection } from "@/collections/recipe";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,

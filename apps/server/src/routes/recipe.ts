@@ -38,6 +38,15 @@ export const recipeRoutes = new Hono<{ Variables: AuthMiddlewareVariables }>()
     const recipes = await db.query.recipe.findMany({
       where: (recipe, { eq }) => eq(recipe.userId, user.id),
       orderBy: (recipe, { desc }) => desc(recipe.createdAt),
+      columns: {
+        id: true,
+        name: true,
+        description: true,
+        originUrl: true,
+        slug: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
     return c.json(recipes);
   })
