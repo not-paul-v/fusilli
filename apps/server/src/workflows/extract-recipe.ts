@@ -21,6 +21,7 @@ import { NonRetryableError } from "cloudflare:workflows";
 
 export type Params = {
   url: string;
+  userId: string;
 };
 
 export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
@@ -28,11 +29,12 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
   Params
 > {
   async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
-    const { url } = event.payload;
+    const { url, userId } = event.payload;
 
     await step.do("check if recipe exists", async () => {
       const existingRecipe = await db.query.recipe.findFirst({
-        where: (recipe, { eq }) => eq(recipe.originUrl, url),
+        where: (recipe, { and, eq }) =>
+          and(eq(recipe.userId, userId), eq(recipe.originUrl, url)),
       });
       if (existingRecipe != null) {
         throw new NonRetryableError("Recipe already exists");
@@ -84,6 +86,7 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
       const inserted = await db
         .insert(recipeTable)
         .values({
+          userId,
           name: llmRecipe.name,
           description: llmRecipe.description,
           slug: slugify(llmRecipe.name), // TODO: handle duplicate slugs

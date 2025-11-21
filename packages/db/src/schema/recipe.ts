@@ -13,6 +13,7 @@ export const recipe = sqliteTable("recipe", {
   id: text("id")
     .primaryKey()
     .$default(() => uuid()),
+  userId: text("user_id").notNull(),
   name: text("name").notNull(),
   description: text("description").notNull(),
   originUrl: text("origin_url").notNull().unique(),
