@@ -10,7 +10,7 @@ import z from "zod";
 
 export const recipeRoutes = new Hono<{ Variables: AuthMiddlewareVariables }>()
   .use(authMiddleware)
-  .get(
+  .post(
     "/from-link",
     zValidator(
       "query",
