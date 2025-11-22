@@ -1,41 +1,18 @@
 import { Button } from "./ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "./ui/dialog";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { useNavigate } from "@tanstack/react-router";
+import { PlusIcon } from "lucide-react";
 
-export default function NewRecipe() {
+export function NewRecipeButton() {
+	const navigate = useNavigate();
+
+	const handleClick = () => {
+		navigate({ to: "/new-recipe" });
+	};
+
 	return (
-		<Dialog>
-			<DialogTrigger asChild>
-				<Button>New Recipe</Button>
-			</DialogTrigger>
-			<DialogContent className="sm:max-w-[425px]">
-				<DialogHeader>
-					<DialogTitle>New Recipe</DialogTitle>
-					<DialogDescription>
-						Enter a link to a recipe you want to add.
-					</DialogDescription>
-				</DialogHeader>
-				<div className="grid gap-4 py-4">
-					<div className="grid grid-cols-4 items-center gap-4">
-						<Label htmlFor="link" className="text-right">
-							Link
-						</Label>
-						<Input id="link" className="col-span-3" />
-					</div>
-				</div>
-				<DialogFooter>
-					<Button type="submit">Create</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+		<Button onClick={handleClick} size="lg" className="gap-2">
+			<PlusIcon className="size-4" />
+			New Recipe
+		</Button>
 	);
 }

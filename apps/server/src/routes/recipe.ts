@@ -26,11 +26,9 @@ export const recipeRoutes = new Hono<{ Variables: AuthMiddlewareVariables }>()
           userId: user.id,
         },
       });
-
       return c.json({
         id: instance.id,
-        details: await instance.status(),
-      });
+      } as { id: string }); // hack to allow type inference in api client
     },
   )
   .get("/", async (c) => {
