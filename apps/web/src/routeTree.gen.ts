@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as NewRecipeRouteImport } from './routes/new-recipe'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RecipesRecipeSlugRouteImport } from './routes/recipes.$recipeSlug'
 
 const NewRecipeRoute = NewRecipeRouteImport.update({
   id: '/new-recipe',
@@ -28,35 +29,44 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecipesRecipeSlugRoute = RecipesRecipeSlugRouteImport.update({
+  id: '/recipes/$recipeSlug',
+  path: '/recipes/$recipeSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/new-recipe': typeof NewRecipeRoute
+  '/recipes/$recipeSlug': typeof RecipesRecipeSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/new-recipe': typeof NewRecipeRoute
+  '/recipes/$recipeSlug': typeof RecipesRecipeSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/new-recipe': typeof NewRecipeRoute
+  '/recipes/$recipeSlug': typeof RecipesRecipeSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/new-recipe'
+  fullPaths: '/' | '/login' | '/new-recipe' | '/recipes/$recipeSlug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/new-recipe'
-  id: '__root__' | '/' | '/login' | '/new-recipe'
+  to: '/' | '/login' | '/new-recipe' | '/recipes/$recipeSlug'
+  id: '__root__' | '/' | '/login' | '/new-recipe' | '/recipes/$recipeSlug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   NewRecipeRoute: typeof NewRecipeRoute
+  RecipesRecipeSlugRoute: typeof RecipesRecipeSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recipes/$recipeSlug': {
+      id: '/recipes/$recipeSlug'
+      path: '/recipes/$recipeSlug'
+      fullPath: '/recipes/$recipeSlug'
+      preLoaderRoute: typeof RecipesRecipeSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   NewRecipeRoute: NewRecipeRoute,
+  RecipesRecipeSlugRoute: RecipesRecipeSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

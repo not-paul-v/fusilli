@@ -144,6 +144,7 @@ function RecipeExtractionStatus({ workflowId }: { workflowId: string }) {
 					</p>
 				)}
 			</div>
+			<code>{JSON.stringify(data, null, 2)}</code>
 		</div>
 	);
 }

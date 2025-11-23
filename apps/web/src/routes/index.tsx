@@ -1,5 +1,5 @@
 import { useLiveQuery } from "@tanstack/react-db";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { recipeCollection } from "@/collections/recipe";
 import { authClient } from "@/lib/auth-client";
 
@@ -25,17 +25,23 @@ function HomeComponent() {
 		<div className="w-full px-4 py-2">
 			<div className="space-y-2">
 				{data.map((recipe) => (
-					<div key={recipe.id} className="border-b py-2">
-						<div className="flex flex-col gap-2">
-							<div>
-								<strong>{recipe.name}</strong>
-							</div>
-							<div className="text-sm">{recipe.description}</div>
-							<div className="text-muted-foreground text-sm">
-								{new Date(recipe.createdAt).toLocaleDateString()}
+					<Link
+						key={recipe.id}
+						to="/recipes/$recipeSlug"
+						params={{ recipeSlug: recipe.slug }}
+					>
+						<div className="border-b py-2">
+							<div className="flex flex-col gap-2">
+								<div>
+									<strong>{recipe.name}</strong>
+								</div>
+								<div className="text-sm">{recipe.description}</div>
+								<div className="text-muted-foreground text-sm">
+									{new Date(recipe.createdAt).toLocaleDateString()}
+								</div>
 							</div>
 						</div>
-					</div>
+					</Link>
 				))}
 			</div>
 		</div>
