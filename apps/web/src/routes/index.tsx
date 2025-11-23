@@ -13,7 +13,6 @@ export const Route = createFileRoute("/")({
 				throw: true,
 			});
 		}
-		console.log("preloading recipes");
 		recipeCollection.preload();
 		return { session };
 	},
