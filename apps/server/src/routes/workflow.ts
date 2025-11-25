@@ -8,9 +8,10 @@ export const workflowRoutes = new Hono()
 		const workflow = await env.EXTRACT_RECIPE_WORKFLOW.get(
 			c.req.param("workflowId"),
 		);
-		const { status } = await workflow.status();
+		const workflowStatus = await workflow.status();
 		return c.json({
-			status,
+			...workflowStatus,
+			status: workflowStatus.status,
 		} as {
 			status:
 				| "queued"

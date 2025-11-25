@@ -2,6 +2,7 @@ import { env } from "cloudflare:workers";
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./schema";
 
+export * from "drizzle-orm";
 export * from "./schema";
 export * from "./utils";
 

@@ -1,5 +1,6 @@
 import { eq, useLiveQuery } from "@tanstack/react-db";
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { ingredientCollection } from "@/collections/ingredient";
 import { recipeCollection } from "@/collections/recipe";
 import { authClient } from "@/lib/auth-client";
 
@@ -25,13 +26,26 @@ function RouteComponent() {
 			.from({ recipe: recipeCollection })
 			.where(({ recipe }) => eq(recipe.slug, recipeSlug)),
 	);
-
 	const [recipe] = recipesData;
 
 	return (
 		<div>
-			Hello "/recipes/$recipeSlug"!{" "}
 			<code>{JSON.stringify(recipe, null, 2)}</code>
+			<br />
+			{recipe && <Ingredients recipeId={recipe.id} />}
+		</div>
+	);
+}
+
+function Ingredients({ recipeId }: { recipeId: string }) {
+	const { data: ingredientsData } = useLiveQuery((q) =>
+		q
+			.from({ ingredient: ingredientCollection })
+			.where(({ ingredient }) => eq(ingredient.recipeId, recipeId)),
+	);
+	return (
+		<div>
+			<code>{JSON.stringify(ingredientsData, null, 2)}</code>
 		</div>
 	);
 }
