@@ -18,6 +18,7 @@ import invariant from "tiny-invariant";
 import { match } from "ts-pattern";
 import { extractRecipeSystemPrompt } from "@/prompts/recipe";
 import { recipeSchema } from "@/schemas/recipe";
+import { flattenIngredient } from "@/utils/ingredient-conversion";
 import type { server } from "../../../../alchemy.run";
 
 export type Params = {
@@ -109,31 +110,9 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 					}),
 				);
 				const ingredients: (typeof ingredientTable.$inferInsert)[] =
-					llmRecipe.ingredients.map((ingredient) => {
-						return match(ingredient)
-							.with({ type: "exact" }, (exactIngredient) => ({
-								recipeId: recipeId,
-								name: exactIngredient.name,
-								amount: exactIngredient.amount,
-								unit: exactIngredient.unit,
-								type: "exact" as const,
-							}))
-							.with({ type: "range" }, (rangeIngredient) => ({
-								recipeId: recipeId,
-								name: rangeIngredient.name,
-								minAmount: rangeIngredient.minAmount,
-								maxAmount: rangeIngredient.maxAmount,
-								unit: rangeIngredient.unit,
-								type: "range" as const,
-							}))
-							.with({ type: "other" }, (otherIngredient) => ({
-								recipeId: recipeId,
-								name: otherIngredient.name,
-								descriptiveAmount: otherIngredient.amount,
-								type: "other" as const,
-							}))
-							.exhaustive();
-					});
+					llmRecipe.ingredients.map((ingredient) =>
+						flattenIngredient(ingredient, recipeId),
+					);
 
 				await autochunk({ items: steps }, (chunk) =>
 					db.insert(stepTable).values(chunk),

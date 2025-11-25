@@ -1,11 +1,13 @@
-import { db, eq, recipe as recipeTable, type SQLWrapper } from "@fusilli/db";
+import { db } from "@fusilli/db";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
+import { HTTPException } from "hono/http-exception";
 import z from "zod";
 import {
 	type AuthMiddlewareVariables,
 	authMiddleware,
 } from "@/middleware/auth";
+import { unflattenIngredient } from "@/utils/ingredient-conversion";
 
 export const ingredientRoutes = new Hono<{
 	Variables: AuthMiddlewareVariables;
@@ -29,14 +31,15 @@ export const ingredientRoutes = new Hono<{
 			});
 
 			if (!recipe) {
-				return c.json({ error: "Recipe not found" }, 404);
+				throw new HTTPException(404, { message: "Recipe not found" });
 			}
 
-			const ingredients = await db.query.ingredient.findMany({
+			const flatIngredients = await db.query.ingredient.findMany({
 				where: (ingredient, { eq }) => eq(ingredient.recipeId, recipe.id),
 				orderBy: (ingredient, { desc }) => desc(ingredient.createdAt),
 			});
 
-			return c.json(ingredients);
+			const ingredients = flatIngredients.map(unflattenIngredient);
+			return c.json({ ingredients: ingredients });
 		},
 	);

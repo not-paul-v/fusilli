@@ -5,20 +5,37 @@ import z from "zod";
 import { apiClient } from "@/lib/api-client";
 import { queryClient } from "@/lib/query-client";
 
-// TODO: return union type from backend
-const ingredientSchema = z.object({
+const baseIngredientSchema = z.object({
 	id: z.string(),
-	name: z.string(),
-	createdAt: z.string(),
-	updatedAt: z.string(),
 	recipeId: z.string(),
-	type: z.string(),
-	unit: z.string().nullable(),
-	amount: z.number().nullable(),
-	minAmount: z.number().nullable(),
-	maxAmount: z.number().nullable(),
-	descriptiveAmount: z.string().nullable(),
 });
+
+const exactIngredientSchema = baseIngredientSchema.extend({
+	type: z.literal("exact"),
+	name: z.string(),
+	unit: z.string(),
+	amount: z.number(),
+});
+
+const rangeIngredientSchema = baseIngredientSchema.extend({
+	type: z.literal("range"),
+	name: z.string(),
+	unit: z.string(),
+	minAmount: z.number(),
+	maxAmount: z.number(),
+});
+
+const otherIngredientSchema = baseIngredientSchema.extend({
+	type: z.literal("other"),
+	name: z.string(),
+	amount: z.string(),
+});
+
+const ingredientSchema = z.discriminatedUnion("type", [
+	exactIngredientSchema,
+	rangeIngredientSchema,
+	otherIngredientSchema,
+]);
 
 type Query = {
 	recipeId?: string;
@@ -53,10 +70,8 @@ export const ingredientCollection = createCollection(
 				query: { recipe_id: query.recipeId },
 			});
 			const json = await response.json();
-			if ("error" in json) {
-				throw new Error(json.error);
-			}
-			return json;
+			// Workaround since type inference doesn't seem to work here
+			return ingredientSchema.array().parse(json.ingredients);
 		},
 	}),
 );
