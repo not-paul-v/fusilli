@@ -37,6 +37,8 @@ const ingredientSchema = z.discriminatedUnion("type", [
 	otherIngredientSchema,
 ]);
 
+export type Ingredient = z.infer<typeof ingredientSchema>;
+
 type Query = {
 	recipeId?: string;
 };

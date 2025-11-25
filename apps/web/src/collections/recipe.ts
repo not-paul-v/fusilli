@@ -13,6 +13,7 @@ const recipeSchema = z.object({
 	createdAt: z.string(),
 	updatedAt: z.string(),
 });
+export type Recipe = z.infer<typeof recipeSchema>;
 
 export const recipeCollection = createCollection(
 	queryCollectionOptions({
