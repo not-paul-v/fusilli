@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { CheckCircleIcon, LinkIcon, LoaderIcon, PlusIcon } from "lucide-react";
+import { LinkIcon, LoaderIcon, PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { match } from "ts-pattern";
 import { recipeCollection } from "@/collections/recipe";
@@ -115,13 +115,16 @@ function RecipeExtractionStatus({ workflowId }: { workflowId: string }) {
 	});
 
 	useEffect(() => {
-		if (data?.status === "complete") {
+		if (data?.status === "success") {
 			recipeCollection.utils.refetch();
 			setTimeout(() => {
-				navigate({ to: "/" });
+				navigate({
+					to: "/recipes/$recipeSlug",
+					params: { recipeSlug: data.recipe.slug },
+				});
 			}, 2000);
 		}
-	}, [data?.status, navigate]);
+	}, [data, navigate]);
 
 	if (data == null) {
 		return null;
@@ -134,11 +137,11 @@ function RecipeExtractionStatus({ workflowId }: { workflowId: string }) {
 					{isLoading
 						? "Extracting recipe..."
 						: match(data.status)
-								.with("complete", () => "Recipe extracted successfully!")
-								.with("errored", () => "Failed to extract recipe")
+								.with("success", () => "Recipe extracted successfully!")
+								.with("error", () => "Failed to extract recipe")
 								.otherwise(() => `Status: ${data.status || "Processing..."}`)}
 				</p>
-				{data?.status === "complete" && (
+				{data?.status === "success" && (
 					<p className="mt-1 text-muted-foreground text-sm">
 						Redirecting to your recipes...
 					</p>

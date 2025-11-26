@@ -3,7 +3,6 @@ import {
 	type WorkflowEvent,
 	type WorkflowStep,
 } from "cloudflare:workers";
-import { NonRetryableError } from "cloudflare:workflows";
 import puppeteer, { type Page } from "@cloudflare/puppeteer";
 import {
 	autochunk,
@@ -16,7 +15,7 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { generateObject } from "ai";
 import invariant from "tiny-invariant";
 import { extractRecipeSystemPrompt } from "@/prompts/recipe";
-import { recipeSchema } from "@/schemas/recipe";
+import { llmRecipeResponseSchema } from "@/schemas/recipe";
 import { flattenIngredient } from "@/utils/ingredient-conversion";
 import type { server } from "../../../../alchemy.run";
 
@@ -94,7 +93,7 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 						provider: { order: ["cerebras"] },
 					}),
 					prompt: textContent,
-					schema: recipeSchema,
+					schema: llmRecipeResponseSchema,
 					system: extractRecipeSystemPrompt,
 				});
 				return recipe;
@@ -105,11 +104,11 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 		);
 
 		const saveDbStartTime = Date.now();
-		await step.do(
+		const insertedRecipe = await step.do(
 			"save in db",
 			{ retries: { limit: 0, delay: 0 } },
 			async () => {
-				const inserted = await db
+				const [recipe] = await db
 					.insert(recipeTable)
 					.values({
 						userId,
@@ -118,21 +117,20 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 						slug: slugify(llmRecipe.name), // TODO: handle duplicate slugs
 						originUrl: url,
 					})
-					.returning({ id: recipeTable.id });
+					.returning();
 
-				const recipeId = inserted[0]?.id;
-				invariant(recipeId, "Failed to insert recipe");
+				invariant(recipe != null, "Failed to insert recipe");
 
 				const steps: (typeof stepTable.$inferInsert)[] = llmRecipe.steps.map(
 					(stepText, i) => ({
-						recipeId: recipeId,
+						recipeId: recipe.id,
 						order: i,
 						content: stepText,
 					}),
 				);
 				const ingredients: (typeof ingredientTable.$inferInsert)[] =
 					llmRecipe.ingredients.map((ingredient) =>
-						flattenIngredient(ingredient, recipeId),
+						flattenIngredient(ingredient, recipe.id),
 					);
 
 				await autochunk({ items: steps }, (chunk) =>
@@ -141,6 +139,8 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 				await autochunk({ items: ingredients }, (chunk) =>
 					db.insert(ingredientTable).values(chunk),
 				);
+
+				return recipe;
 			},
 		);
 		console.log(
@@ -149,6 +149,7 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 		console.log(
 			`[Extract Recipe Workflow] Total workflow completed in ${Date.now() - workflowStartTime}ms`,
 		);
+		return insertedRecipe;
 	}
 }
 

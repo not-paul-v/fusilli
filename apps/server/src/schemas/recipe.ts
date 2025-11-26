@@ -33,7 +33,7 @@ const ingredientSchema = z.discriminatedUnion("type", [
 ]);
 export type Ingredient = z.infer<typeof ingredientSchema>;
 
-export const recipeSchema = z.object({
+export const llmRecipeResponseSchema = z.object({
 	name: z.string().describe("The name or title of the recipe."),
 	description: z
 		.string()
@@ -46,4 +46,4 @@ export const recipeSchema = z.object({
 		.describe("An ordered list of the cooking instructions."),
 });
 
-export type Recipe = z.infer<typeof recipeSchema>;
+export type LLMRecipeResponse = z.infer<typeof llmRecipeResponseSchema>;
