@@ -3,7 +3,12 @@ import {
 	type WorkflowEvent,
 	type WorkflowStep,
 } from "cloudflare:workers";
-import puppeteer, { type Page } from "@cloudflare/puppeteer";
+import puppeteer, {
+	type ActiveSession,
+	type Browser,
+	type BrowserWorker,
+	type Page,
+} from "@cloudflare/puppeteer";
 import {
 	autochunk,
 	db,
@@ -62,12 +67,7 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 				},
 			},
 			async () => {
-				const browser = await puppeteer.launch(this.env.BROWSER);
-				const page = await browser.newPage();
-				await page.goto(url);
-				const textContent = await extractPrimaryText(page);
-				await browser.close();
-				return textContent;
+				return extractTextFromUrl(url, this.env.BROWSER);
 			},
 		);
 		console.log(
@@ -151,6 +151,53 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 		);
 		return insertedRecipe;
 	}
+}
+
+async function extractTextFromUrl(url: string, browserBinding: BrowserWorker) {
+	let sessionId = await getRandomExistingSession(browserBinding);
+	let browser: Browser | undefined;
+
+	if (sessionId != null) {
+		try {
+			browser = await puppeteer.connect(browserBinding, sessionId);
+			console.log(`Reused existing session ${sessionId}`);
+		} catch (e) {
+			// another worker may have connected first
+			console.log(`Failed to connect to ${sessionId}. Error ${e}`);
+		}
+	}
+
+	if (browser == null) {
+		browser = await puppeteer.launch(browserBinding);
+	}
+	sessionId = browser.sessionId();
+
+	const page = await browser.newPage();
+	await page.goto(url);
+	const textContent = await extractPrimaryText(page);
+
+	browser.disconnect();
+
+	return textContent;
+}
+
+async function getRandomExistingSession(endpoint: BrowserWorker) {
+	const sessions: ActiveSession[] = await puppeteer.sessions(endpoint);
+	console.log(`Sessions: ${JSON.stringify(sessions)}`);
+	const sessionsIds = sessions
+		.filter((v) => {
+			return !v.connectionId; // remove sessions with workers connected to them
+		})
+		.map((v) => {
+			return v.sessionId;
+		});
+	if (sessionsIds.length === 0) {
+		return null;
+	}
+
+	const sessionId = sessionsIds[Math.floor(Math.random() * sessionsIds.length)];
+	invariant(sessionId != null, "sessionId cannot be null");
+	return sessionId;
 }
 
 async function extractPrimaryText(page: Page): Promise<string> {
