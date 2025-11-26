@@ -53,7 +53,7 @@ export const ingredientCollection = createCollection(
 		syncMode: "on-demand",
 
 		queryFn: async (ctx) => {
-			// @ts-expect-error https://github.com/TanStack/db/pull/869
+			invariant(ctx.meta != null);
 			const { limit, where, orderBy } = ctx.meta.loadSubsetOptions;
 			const parsed = parseLoadSubsetOptions({ where, orderBy, limit });
 

@@ -27,8 +27,6 @@ export const workflowRoutes = new Hono()
 		);
 		const workflowStatus = await workflow.status();
 
-		console.log(JSON.stringify(workflowStatus));
-
 		const response = match<InstanceStatus, WorkflowResponse>(workflowStatus)
 			.with({ status: "errored" }, () => ({
 				status: "error",
