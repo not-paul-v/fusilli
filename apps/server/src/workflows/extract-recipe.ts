@@ -15,7 +15,6 @@ import {
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { generateObject } from "ai";
 import invariant from "tiny-invariant";
-import { match } from "ts-pattern";
 import { extractRecipeSystemPrompt } from "@/prompts/recipe";
 import { recipeSchema } from "@/schemas/recipe";
 import { flattenIngredient } from "@/utils/ingredient-conversion";
@@ -32,7 +31,12 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 > {
 	async run(event: WorkflowEvent<Params>, step: WorkflowStep) {
 		const { url, userId } = event.payload;
+		const workflowStartTime = Date.now();
+		console.log(
+			`[Extract Recipe Workflow] Starting workflow for URL: ${url}, User: ${userId}`,
+		);
 
+		const stepStartTime = Date.now();
 		await step.do("check if recipe exists", async () => {
 			const existingRecipe = await db.query.recipe.findFirst({
 				where: (recipe, { and, eq }) =>
@@ -42,7 +46,11 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 				throw new NonRetryableError("Recipe already exists");
 			}
 		});
+		console.log(
+			`[Extract Recipe Workflow] Step "check if recipe exists" completed in ${Date.now() - stepStartTime}ms`,
+		);
 
+		const extractTextStartTime = Date.now();
 		const textContent = await step.do(
 			"extract text content from page",
 			{
@@ -60,7 +68,11 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 				return textContent;
 			},
 		);
+		console.log(
+			`[Extract Recipe Workflow] Step "extract text content from page" completed in ${Date.now() - extractTextStartTime}ms`,
+		);
 
+		const llmStartTime = Date.now();
 		const llmRecipe = await step.do(
 			"extract recipe from text",
 			{
@@ -75,7 +87,9 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 				});
 
 				const { object: recipe } = await generateObject({
-					model: openrouter.chat("google/gemini-2.5-flash"),
+					model: openrouter.chat("openai/gpt-oss-120b", {
+						provider: { order: ["cerebras"] },
+					}),
 					prompt: textContent,
 					schema: recipeSchema,
 					system: extractRecipeSystemPrompt,
@@ -83,7 +97,11 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 				return recipe;
 			},
 		);
+		console.log(
+			`[Extract Recipe Workflow] Step "extract recipe from text" completed in ${Date.now() - llmStartTime}ms`,
+		);
 
+		const saveDbStartTime = Date.now();
 		await step.do(
 			"save in db",
 			{ retries: { limit: 0, delay: 0 } },
@@ -121,6 +139,12 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 					db.insert(ingredientTable).values(chunk),
 				);
 			},
+		);
+		console.log(
+			`[Extract Recipe Workflow] Step "save in db" completed in ${Date.now() - saveDbStartTime}ms`,
+		);
+		console.log(
+			`[Extract Recipe Workflow] Total workflow completed in ${Date.now() - workflowStartTime}ms`,
 		);
 	}
 }
