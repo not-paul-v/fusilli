@@ -37,18 +37,21 @@ export class ExtractRecipeWorkflow extends WorkflowEntrypoint<
 		);
 
 		const stepStartTime = Date.now();
-		await step.do("check if recipe exists", async () => {
+		const recipe = await step.do("check if recipe exists", async () => {
 			const existingRecipe = await db.query.recipe.findFirst({
 				where: (recipe, { and, eq }) =>
 					and(eq(recipe.userId, userId), eq(recipe.originUrl, url)),
 			});
-			if (existingRecipe != null) {
-				throw new NonRetryableError("Recipe already exists");
-			}
+			return existingRecipe;
 		});
 		console.log(
 			`[Extract Recipe Workflow] Step "check if recipe exists" completed in ${Date.now() - stepStartTime}ms`,
 		);
+
+		if (recipe != null) {
+			console.log("[Extract Recipe Workflow] Recipe has already been parsed.");
+			return recipe;
+		}
 
 		const extractTextStartTime = Date.now();
 		const textContent = await step.do(
