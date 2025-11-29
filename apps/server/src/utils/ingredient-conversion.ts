@@ -12,6 +12,10 @@ export type FlatIngredient = typeof ingredient.$inferInsert;
 type ExactIngredientWithId = { id: string; recipeId: string } & ExactIngredient;
 type RangeIngredientWithId = { id: string; recipeId: string } & RangeIngredient;
 type OtherIngredientWithId = { id: string; recipeId: string } & OtherIngredient;
+type IngredientWithId =
+	| ExactIngredientWithId
+	| RangeIngredientWithId
+	| OtherIngredientWithId;
 
 export function flattenIngredient(
 	ingredient: Ingredient,

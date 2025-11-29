@@ -8,7 +8,8 @@ import {
 } from "alchemy/cloudflare";
 import { Exec } from "alchemy/os";
 import { config } from "dotenv";
-import type { Params as ExtraceRecipeWorkflowParams } from "./apps/server/src/workflows/extract-recipe";
+import type { ExtractRecipeFromUrlParams } from "./apps/server/src/workflows/extract-recipe/from-url/extract-recipe-from-url";
+import type { ExtractRecipeFromFileParams } from "./apps/server/src/workflows/extract-recipe-from-file";
 
 config({ path: "./.env" });
 config({ path: "./apps/web/.env" });
@@ -47,11 +48,18 @@ export const server = await Worker("server", {
 		BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || "",
 		OPENROUTER_API_KEY: alchemy.secret(process.env.OPENROUTER_API_KEY),
 		BROWSER: BrowserRendering(),
-		EXTRACT_RECIPE_WORKFLOW: Workflow<ExtraceRecipeWorkflowParams>(
-			"extract-recipe",
+		EXTRACT_RECIPE_FROM_URL_WORKFLOW: Workflow<ExtractRecipeFromUrlParams>(
+			"extract-recipe-from-url",
 			{
-				workflowName: "extract-recipe",
-				className: "ExtractRecipeWorkflow",
+				workflowName: "extract-recipe-from-url",
+				className: "ExtractRecipeFromUrlWorkflow",
+			},
+		),
+		EXTRACT_RECIPE_FROM_PDF_WORKFLOW: Workflow<ExtractRecipeFromFileParams>(
+			"extract-recipe-from-file",
+			{
+				workflowName: "extract-recipe-from-pdf",
+				className: "ExtractRecipeFromPDFWorkflow",
 			},
 		),
 	},

@@ -2,10 +2,10 @@ import { env } from "cloudflare:workers";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
-import { recipeRoutes } from "./routes/recipe";
 import { authRoutes } from "./routes/auth";
-import { workflowRoutes } from "./routes/workflow";
 import { ingredientRoutes } from "./routes/ingredients";
+import { recipeRoutes } from "./routes/recipe";
+import { workflowRoutes } from "./routes/workflow";
 
 export * from "./workflows";
 

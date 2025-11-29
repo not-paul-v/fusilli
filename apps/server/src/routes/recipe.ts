@@ -20,7 +20,7 @@ export const recipeRoutes = new Hono<{ Variables: AuthMiddlewareVariables }>()
 		),
 		async (c) => {
 			const user = c.get("user");
-			const instance = await env.EXTRACT_RECIPE_WORKFLOW.create({
+			const instance = await env.EXTRACT_RECIPE_FROM_URL_WORKFLOW.create({
 				params: {
 					url: c.req.valid("query").url,
 					userId: user.id,

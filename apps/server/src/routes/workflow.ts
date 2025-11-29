@@ -22,7 +22,7 @@ type WorkflowResponse =
 export const workflowRoutes = new Hono()
 	.use(authMiddleware)
 	.get("/:workflowId", async (c) => {
-		const workflow = await env.EXTRACT_RECIPE_WORKFLOW.get(
+		const workflow = await env.EXTRACT_RECIPE_FROM_URL_WORKFLOW.get(
 			c.req.param("workflowId"),
 		);
 		const workflowStatus = await workflow.status();
