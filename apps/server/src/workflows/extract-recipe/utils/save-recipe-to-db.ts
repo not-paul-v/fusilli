@@ -2,12 +2,15 @@ import {
 	autochunk,
 	db,
 	ingredient as ingredientTable,
+	type Recipe,
 	recipe as recipeTable,
 	step as stepTable,
 } from "@fusilli/db";
 import invariant from "tiny-invariant";
-import { flattenIngredient } from "@/utils/ingredient-conversion";
+import { match } from "ts-pattern";
 import type { LLMRecipeResponse } from "@/schemas/recipe";
+import { flattenIngredient } from "@/utils/ingredient-conversion";
+import type { Origin } from "@/workflows/types";
 
 function slugify(text: string): string {
 	return text
@@ -21,11 +24,26 @@ function slugify(text: string): string {
 		.replace(/-$/g, ""); // Remove trailing -
 }
 
+type DBOrigin = Pick<Recipe, "origin" | "originUrl" | "r2Key">;
+
 export async function saveRecipeToDb(
 	llmRecipe: LLMRecipeResponse,
 	userId: string,
-	originUrl: string,
+	origin: Origin,
 ) {
+	const originValues = match<Origin, DBOrigin>(origin)
+		.with({ type: "url" }, ({ url }) => ({
+			origin: "url",
+			originUrl: url,
+			r2Key: null,
+		}))
+		.with({ type: "pdf" }, ({ r2Key }) => ({
+			origin: "pdf",
+			r2Key,
+			originUrl: null,
+		}))
+		.exhaustive();
+
 	const [recipe] = await db
 		.insert(recipeTable)
 		.values({
@@ -33,7 +51,7 @@ export async function saveRecipeToDb(
 			name: llmRecipe.name,
 			description: llmRecipe.description,
 			slug: slugify(llmRecipe.name), // TODO: handle duplicate slugs
-			originUrl,
+			...originValues,
 		})
 		.returning();
 

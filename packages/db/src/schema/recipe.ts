@@ -5,21 +5,58 @@ import {
 	real,
 	sqliteTable,
 	text,
+	uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 import { v7 as uuid } from "uuid";
 import { timestampColumns } from "./utils";
 
-export const recipe = sqliteTable("recipe", {
-	id: text("id")
-		.primaryKey()
-		.$default(() => uuid()),
-	userId: text("user_id").notNull(),
-	name: text("name").notNull(),
-	description: text("description").notNull(),
-	originUrl: text("origin_url").notNull().unique(),
-	slug: text("slug").notNull().unique(),
-	...timestampColumns,
-});
+export const origins = ["url", "pdf"] as const;
+
+export const recipe = sqliteTable(
+	"recipe",
+	{
+		id: text("id")
+			.primaryKey()
+			.$default(() => uuid()),
+		userId: text("user_id").notNull(),
+		name: text("name").notNull(),
+		description: text("description").notNull(),
+		slug: text("slug").notNull().unique(),
+
+		origin: text("origin", { enum: origins }).notNull(),
+
+		// origin url
+		originUrl: text("origin_url"),
+		// origin pdf
+		r2Key: text("r2_key"),
+
+		...timestampColumns,
+	},
+	(table) => [
+		check(
+			"origin_url",
+			sql`
+				(${table.origin} != 'url')
+				OR (
+					${table.originUrl} IS NOT NULL
+					AND ${table.r2Key} IS NULL
+				)
+			`,
+		),
+		check(
+			"origin_pdf",
+			sql`
+				(${table.origin} != 'pdf')
+				OR (
+					${table.r2Key} IS NOT NULL
+					AND ${table.originUrl} IS NULL
+				)
+			`,
+		),
+		uniqueIndex("recipe_url_unique").on(table.originUrl),
+		uniqueIndex("recipe_r2_key_unique").on(table.r2Key),
+	],
+);
 export type Recipe = typeof recipe.$inferSelect;
 
 export const ingredient = sqliteTable(

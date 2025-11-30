@@ -16,6 +16,8 @@
 - **Error Handling**: Return error responses with proper status codes (e.g., `c.json({ error: "..." }, 404)`)
 - **Async**: Use async/await, avoid floating promises (typescript/no-floating-promises)
 - **TypeScript**: No inferrable types, use as const assertions, no parameter reassignment
+- **Invariants**: Always use invariants (`tiny-invariant`) where it makes sense
+- **Pattern Matching**: Always use pattern matching (`ts-pattern`) for algebraic data types
 
 ## Project Structure
 - Monorepo with Turbo: `apps/` (server, web) and `packages/` (auth, db)

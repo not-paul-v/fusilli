@@ -1,15 +1,19 @@
 import alchemy from "alchemy";
 import {
+	Ai,
 	BrowserRendering,
 	D1Database,
+	R2Bucket,
 	Vite,
 	Worker,
 	Workflow,
 } from "alchemy/cloudflare";
 import { Exec } from "alchemy/os";
 import { config } from "dotenv";
-import type { ExtractRecipeFromUrlParams } from "./apps/server/src/workflows/extract-recipe/from-url/extract-recipe-from-url";
-import type { ExtractRecipeFromFileParams } from "./apps/server/src/workflows/extract-recipe-from-file";
+import type {
+	ExtractRecipeFromPDFParams,
+	ExtractRecipeFromUrlParams,
+} from "./apps/server/src/workflows";
 
 config({ path: "./.env" });
 config({ path: "./apps/web/.env" });
@@ -37,16 +41,18 @@ export const web = await Vite("web", {
 	},
 });
 
+const bucket = await R2Bucket("recipe-files", {
+	name: "recipe-files",
+});
+
 export const server = await Worker("server", {
 	cwd: "apps/server",
 	entrypoint: "src/index.ts",
 	compatibility: "node",
 	bindings: {
 		DB: db,
-		CORS_ORIGIN: process.env.CORS_ORIGIN || "",
-		BETTER_AUTH_SECRET: alchemy.secret(process.env.BETTER_AUTH_SECRET),
-		BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || "",
-		OPENROUTER_API_KEY: alchemy.secret(process.env.OPENROUTER_API_KEY),
+		BUCKET: bucket,
+		AI: Ai(),
 		BROWSER: BrowserRendering(),
 		EXTRACT_RECIPE_FROM_URL_WORKFLOW: Workflow<ExtractRecipeFromUrlParams>(
 			"extract-recipe-from-url",
@@ -55,13 +61,17 @@ export const server = await Worker("server", {
 				className: "ExtractRecipeFromUrlWorkflow",
 			},
 		),
-		EXTRACT_RECIPE_FROM_PDF_WORKFLOW: Workflow<ExtractRecipeFromFileParams>(
-			"extract-recipe-from-file",
+		EXTRACT_RECIPE_FROM_PDF_WORKFLOW: Workflow<ExtractRecipeFromPDFParams>(
+			"extract-recipe-from-pdf",
 			{
 				workflowName: "extract-recipe-from-pdf",
 				className: "ExtractRecipeFromPDFWorkflow",
 			},
 		),
+		CORS_ORIGIN: process.env.CORS_ORIGIN || "",
+		BETTER_AUTH_SECRET: alchemy.secret(process.env.BETTER_AUTH_SECRET),
+		BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || "",
+		OPENROUTER_API_KEY: alchemy.secret(process.env.OPENROUTER_API_KEY),
 	},
 	dev: {
 		port: 3000,

@@ -6,6 +6,7 @@ import {
 import type { Recipe } from "@fusilli/db";
 import type { server } from "../../../../../alchemy.run";
 import { Logger } from "../../utils/logger";
+import type { Origin } from "../types";
 import { extractRecipeWithLLM } from "./utils/extract-recipe-with-llm";
 import { saveRecipeToDb } from "./utils/save-recipe-to-db";
 
@@ -18,19 +19,17 @@ export abstract class BaseExtractRecipeWorkflow<
 	): Promise<string>;
 
 	protected abstract getExistingRecipe(
-		userId: string,
 		payload: TParams,
 	): Promise<Recipe | null>;
 
-	protected abstract getOriginUrl(payload: TParams): string;
-
 	protected abstract getWorkflowName(): string;
+
+	protected abstract getOrigin(payload: TParams): Origin;
 
 	async run(event: WorkflowEvent<TParams>, step: WorkflowStep) {
 		const payload = event.payload;
 		const { userId } = payload;
 		const workflowName = this.getWorkflowName();
-		const originUrl = this.getOriginUrl(payload);
 		const logger = new Logger(workflowName);
 
 		const workflowStartTime = Date.now();
@@ -39,7 +38,7 @@ export abstract class BaseExtractRecipeWorkflow<
 
 		const recipe = await timer(logger, "check if recipe exists", async () => {
 			return step.do("check if recipe exists", async () => {
-				return this.getExistingRecipe(userId, payload);
+				return this.getExistingRecipe(payload);
 			});
 		});
 
@@ -83,7 +82,8 @@ export abstract class BaseExtractRecipeWorkflow<
 				"save in db",
 				{ retries: { limit: 0, delay: 0 } },
 				async () => {
-					return saveRecipeToDb(llmRecipe, userId, originUrl);
+					const origin = this.getOrigin(payload);
+					return saveRecipeToDb(llmRecipe, userId, origin);
 				},
 			);
 		});

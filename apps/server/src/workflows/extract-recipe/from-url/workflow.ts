@@ -1,5 +1,6 @@
 import type { WorkflowStep } from "cloudflare:workers";
 import { db, type Recipe } from "@fusilli/db";
+import type { Origin } from "@/workflows/types";
 import { BaseExtractRecipeWorkflow } from "../base-workflow";
 import { extractTextFromUrl } from "./extract-text-from-url";
 
@@ -13,17 +14,22 @@ export class ExtractRecipeFromUrlWorkflow extends BaseExtractRecipeWorkflow<Extr
 		return "Extract Recipe From URL Workflow";
 	}
 
-	protected getOriginUrl(payload: ExtractRecipeFromUrlParams): string {
-		return payload.url;
+	protected getOrigin(payload: ExtractRecipeFromUrlParams): Origin {
+		return {
+			type: "url",
+			url: payload.url,
+		};
 	}
 
 	protected async getExistingRecipe(
-		userId: string,
 		payload: ExtractRecipeFromUrlParams,
 	): Promise<Recipe | null> {
 		const result = await db.query.recipe.findFirst({
 			where: (recipe, { and, eq }) =>
-				and(eq(recipe.userId, userId), eq(recipe.originUrl, payload.url)),
+				and(
+					eq(recipe.userId, payload.userId),
+					eq(recipe.originUrl, payload.url),
+				),
 		});
 		return result ?? null;
 	}
