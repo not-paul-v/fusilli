@@ -8,7 +8,6 @@ import {
 	type AuthMiddlewareVariables,
 	authMiddleware,
 } from "@/middleware/auth";
-import { extractTextFromPdf } from "@/workflows/extract-recipe/from-pdf/extract-text-from-pdf";
 
 export const recipeRoutes = new Hono<{ Variables: AuthMiddlewareVariables }>()
 	.use(authMiddleware)
@@ -52,22 +51,28 @@ export const recipeRoutes = new Hono<{ Variables: AuthMiddlewareVariables }>()
 			}),
 		),
 		async (c) => {
+			const user = c.get("user");
 			const { file } = c.req.valid("form");
 
 			const randomSuffix = crypto.randomUUID();
 			const fileName = file.name.replace(/\.pdf$/i, "");
 			const key = `${fileName}-${randomSuffix}.pdf`;
 
-			await env.BUCKET.put(key, file.stream());
+			const object = await env.BUCKET.put(key, file.stream());
+			if (object == null) {
+				throw new HTTPException(500, { message: "Could not upload pdf" });
+			}
 
-			const text = await extractTextFromPdf(key);
-
-			return c.json({
-				key,
-				fileName: file.name,
-				size: file.size,
-				text,
+			const instance = await env.EXTRACT_RECIPE_FROM_PDF_WORKFLOW.create({
+				params: {
+					userId: user.id,
+					r2Key: object.key,
+					fileName,
+				},
 			});
+			return c.json({
+				id: instance.id,
+			} as { id: string }); // hack to allow type inference in api client
 		},
 	)
 	.get("/", async (c) => {

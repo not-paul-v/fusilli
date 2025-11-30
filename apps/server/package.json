@@ -12,9 +12,9 @@
   },
   "dependencies": {
     "@cloudflare/puppeteer": "^1.0.4",
-    "@hono/zod-validator": "catalog:",
     "@fusilli/auth": "workspace:*",
     "@fusilli/db": "workspace:*",
+    "@hono/zod-validator": "catalog:",
     "@openrouter/ai-sdk-provider": "^1.2.0",
     "@paralleldrive/cuid2": "^3.1.0",
     "ai": "^5.0.76",
@@ -24,6 +24,7 @@
     "hono": "catalog:",
     "tiny-invariant": "catalog:",
     "ts-pattern": "catalog:",
+    "unpdf": "^1.4.0",
     "zod": "catalog:"
   },
   "devDependencies": {

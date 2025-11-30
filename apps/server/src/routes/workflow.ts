@@ -22,10 +22,20 @@ type WorkflowResponse =
 export const workflowRoutes = new Hono()
 	.use(authMiddleware)
 	.get("/:workflowId", async (c) => {
-		const workflow = await env.EXTRACT_RECIPE_FROM_URL_WORKFLOW.get(
-			c.req.param("workflowId"),
-		);
-		const workflowStatus = await workflow.status();
+		let workflowStatus: InstanceStatus;
+
+		// HACK
+		try {
+			const workflow = await env.EXTRACT_RECIPE_FROM_URL_WORKFLOW.get(
+				c.req.param("workflowId"),
+			);
+			workflowStatus = await workflow.status();
+		} catch {
+			const workflow = await env.EXTRACT_RECIPE_FROM_PDF_WORKFLOW.get(
+				c.req.param("workflowId"),
+			);
+			workflowStatus = await workflow.status();
+		}
 
 		const response = match<InstanceStatus, WorkflowResponse>(workflowStatus)
 			.with({ status: "errored" }, () => ({

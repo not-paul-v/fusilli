@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { LinkIcon, LoaderIcon, PlusIcon } from "lucide-react";
+import { FileUpIcon, LinkIcon, LoaderIcon, PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { match } from "ts-pattern";
 import { recipeCollection } from "@/collections/recipe";
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/new-recipe")({
 function NewRecipeRoute() {
 	const [isLoading, setIsLoading] = useState(false);
 
-	const { data, mutate } = useMutation({
+	const { data: urlData, mutate: mutateFromLink } = useMutation({
 		mutationFn: async (url: string) => {
 			const response = await apiClient.api.recipes["from-link"].$post({
 				query: { url },
@@ -32,13 +32,30 @@ function NewRecipeRoute() {
 		},
 	});
 
+	const { data: pdfData, mutate: mutateFromPdf } = useMutation({
+		mutationFn: async (file: File) => {
+			const response = await apiClient.api.recipes["from-pdf"].$post({
+				form: { file },
+			});
+			return response.json();
+		},
+	});
+
+	const data = urlData || pdfData;
+
 	const handleAddRecipe = (e: React.FormEvent) => {
 		e.preventDefault();
 		setIsLoading(true);
 		const form = e.target as HTMLFormElement;
 		const formData = new FormData(form);
+		const file = formData.get("pdf") as File | null;
 		const link = formData.get("link") as string;
-		mutate(link);
+
+		if (file && file.size > 0) {
+			mutateFromPdf(file);
+		} else {
+			mutateFromLink(link);
+		}
 	};
 
 	return (
@@ -49,7 +66,8 @@ function NewRecipeRoute() {
 						Add New Recipe
 					</CardTitle>
 					<CardDescription>
-						Enter a URL to extract and add a recipe to your collection
+						Enter a URL or upload a PDF to extract and add a recipe to your
+						collection
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -67,6 +85,23 @@ function NewRecipeRoute() {
 									placeholder="https://example.com/recipe"
 									className="pl-10"
 									autoFocus
+								/>
+							</div>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="pdf" className="font-medium text-sm">
+								Or upload a PDF
+							</Label>
+							<div className="relative">
+								<FileUpIcon className="-translate-y-1/2 absolute top-1/2 left-3 size-4 transform text-muted-foreground" />
+								<Input
+									disabled={isLoading}
+									id="pdf"
+									name="pdf"
+									type="file"
+									accept=".pdf"
+									className="pl-10"
 								/>
 							</div>
 						</div>

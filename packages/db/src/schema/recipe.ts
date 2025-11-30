@@ -53,8 +53,12 @@ export const recipe = sqliteTable(
 				)
 			`,
 		),
-		uniqueIndex("recipe_url_unique").on(table.originUrl),
-		uniqueIndex("recipe_r2_key_unique").on(table.r2Key),
+		uniqueIndex("recipe_url_unique")
+			.on(table.originUrl)
+			.where(sql`${table.originUrl} IS NOT NULL`),
+		uniqueIndex("recipe_r2_key_unique")
+			.on(table.r2Key)
+			.where(sql`${table.r2Key} IS NOT NULL`),
 	],
 );
 export type Recipe = typeof recipe.$inferSelect;

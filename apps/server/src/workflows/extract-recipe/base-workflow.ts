@@ -101,7 +101,12 @@ async function timer<T>(
 	fn: () => Promise<T>,
 ): Promise<T> {
 	const startTime = Date.now();
-	const result = await fn();
-	logger.info(`Step "${stepName}" completed in ${Date.now() - startTime}ms`);
-	return result;
+	try {
+		const result = await fn();
+		logger.info(`Step "${stepName}" completed in ${Date.now() - startTime}ms`);
+		return result;
+	} catch (error) {
+		logger.error(error);
+		throw error;
+	}
 }

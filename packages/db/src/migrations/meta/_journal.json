@@ -43,6 +43,13 @@
       "when": 1764457408099,
       "tag": "0005_brown_masked_marvel",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1764501409834,
+      "tag": "0006_famous_gargoyle",
+      "breakpoints": true
     }
   ]
 }

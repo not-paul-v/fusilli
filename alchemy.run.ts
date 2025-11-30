@@ -1,6 +1,5 @@
 import alchemy from "alchemy";
 import {
-	Ai,
 	BrowserRendering,
 	D1Database,
 	R2Bucket,
@@ -52,7 +51,6 @@ export const server = await Worker("server", {
 	bindings: {
 		DB: db,
 		BUCKET: bucket,
-		AI: Ai(),
 		BROWSER: BrowserRendering(),
 		EXTRACT_RECIPE_FROM_URL_WORKFLOW: Workflow<ExtractRecipeFromUrlParams>(
 			"extract-recipe-from-url",
