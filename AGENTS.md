@@ -24,3 +24,7 @@
 - Server: Hono + Cloudflare Workers/Workflows, routes in `apps/server/src/routes/`
 - Web: React + TanStack Router/Query, Vite + Tailwind 4
 - DB: Drizzle ORM with SQLite (libsql), schemas in `packages/db/src/schema/`
+
+## Bad Practices
+- NEVER create a .js file
+- NEVER create a .t.ds file for alchemy-run

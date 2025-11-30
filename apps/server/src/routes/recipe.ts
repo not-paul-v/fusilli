@@ -33,34 +33,43 @@ export const recipeRoutes = new Hono<{ Variables: AuthMiddlewareVariables }>()
 			} as { id: string }); // hack to allow type inference in api client
 		},
 	)
-	.post("/from-pdf", async (c) => {
-		const user = c.get("user");
-		const body = await c.req.parseBody();
-		const file = body.file;
+	.post(
+		"/from-pdf",
+		zValidator(
+			"form",
+			z.object({
+				file: z
+					.instanceof(File)
+					.refine((file) => file.type === "application/pdf", {
+						message: "File must be a PDF",
+					})
+					.refine((file) => file.size <= 10_000_000, {
+						message: "File size must be less than 10MB",
+					})
+					.refine((file) => file.size > 0, {
+						message: "File cannot be empty",
+					}),
+			}),
+		),
+		async (c) => {
+			const { file } = c.req.valid("form");
 
-		if (!file || !(file instanceof File)) {
-			throw new HTTPException(400, { message: "No file provided" });
-		}
+			const randomSuffix = crypto.randomUUID();
+			const fileName = file.name.replace(/\.pdf$/i, "");
+			const key = `${fileName}-${randomSuffix}.pdf`;
 
-		if (file.type !== "application/pdf") {
-			throw new HTTPException(400, { message: "File must be a PDF" });
-		}
+			await env.BUCKET.put(key, file.stream());
 
-		const randomSuffix = crypto.randomUUID();
-		const fileName = file.name.replace(/\.pdf$/i, "");
-		const key = `${fileName}-${randomSuffix}.pdf`;
+			const text = await extractTextFromPdf(key);
 
-		await env.BUCKET.put(key, file.stream());
-
-		const text = await extractTextFromPdf(key);
-
-		return c.json({
-			key,
-			fileName: file.name,
-			size: file.size,
-			text,
-		});
-	})
+			return c.json({
+				key,
+				fileName: file.name,
+				size: file.size,
+				text,
+			});
+		},
+	)
 	.get("/", async (c) => {
 		const user = c.get("user");
 		const recipes = await db.query.recipe.findMany({
@@ -78,18 +87,32 @@ export const recipeRoutes = new Hono<{ Variables: AuthMiddlewareVariables }>()
 		return c.json(recipes);
 	})
 	.get("/:slug", async (c) => {
+		const user = c.get("user");
 		const recipeSlug = c.req.param("slug");
 		const recipe = await db.query.recipe.findFirst({
-			where: (recipe, { eq }) => eq(recipe.slug, recipeSlug),
+			where: (recipe, { and, eq }) =>
+				and(eq(recipe.slug, recipeSlug), eq(recipe.userId, user.id)),
 		});
 		if (!recipe) {
-			return c.json({ error: "Recipe not found" }, 404);
+			throw new HTTPException(404, { message: "Recipe not found" });
 		}
 		return c.json(recipe);
 	})
 
 	.get("/:id/steps", async (c) => {
+		const user = c.get("user");
 		const recipeId = c.req.param("id");
+
+		// First verify the user owns this recipe
+		const recipe = await db.query.recipe.findFirst({
+			where: (recipe, { and, eq }) =>
+				and(eq(recipe.id, recipeId), eq(recipe.userId, user.id)),
+		});
+
+		if (!recipe) {
+			throw new HTTPException(404, { message: "Recipe not found" });
+		}
+
 		const steps = await db.query.step.findMany({
 			where: (step, { eq }) => eq(step.recipeId, recipeId),
 			orderBy: (step, { asc }) => asc(step.createdAt),
